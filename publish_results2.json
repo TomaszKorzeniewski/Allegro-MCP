@@ -1,0 +1,48 @@
+[
+  {
+    "sku": "TP/0001",
+    "offer_id": null,
+    "status": "ERROR",
+    "error": "Allegro API error 422: Product is already in the Catalog. We tried to link it with your offer, but the value of the parameter `Długość`in the offer is `36.000` and differs from the value of the parame"
+  },
+  {
+    "sku": "TP/0002",
+    "offer_id": null,
+    "status": "ERROR",
+    "error": "Allegro API error 422: Product is already in the Catalog. We tried to link it with your offer, but the value of the parameter `Liczba sztuk`in the offer is `1` and differs from the value of the parame"
+  },
+  {
+    "sku": "TP/0005",
+    "offer_id": "18732829075",
+    "status": "ACTIVE",
+    "price": "5.04",
+    "dl": 54
+  },
+  {
+    "sku": "TP/0007",
+    "offer_id": null,
+    "status": "ERROR",
+    "error": "Allegro API error 422: Niepoprawna wartość parametru EAN/ISBN/ISSN (225693) dla produktu w ofercie. Prawidłowa wartość parametru dla produktu to: \"5905833093630\"."
+  },
+  {
+    "sku": "TP/0008",
+    "offer_id": "18732829273",
+    "status": "ACTIVE",
+    "price": "8.63",
+    "dl": 54
+  },
+  {
+    "sku": "TP/0012",
+    "offer_id": "18732829345",
+    "status": "ACTIVE",
+    "price": "7.06",
+    "dl": 54
+  },
+  {
+    "sku": "TP/0024",
+    "offer_id": "18732829425",
+    "status": "ACTIVE",
+    "price": "6.32",
+    "dl": 60
+  }
+]

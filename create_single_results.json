@@ -1,0 +1,80 @@
+[
+  {
+    "sku": "TP/0001",
+    "title": "Taśma Pakowa Brązowa Akrylowa 48mm/30m Klejąca do Pakowania Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732779802"
+  },
+  {
+    "sku": "TP/0002",
+    "title": "Taśma Pakowa Transparentna Akrylowa 48mm/30m Klejąca Pakowanie Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732779959"
+  },
+  {
+    "sku": "TP/0003",
+    "title": "Taśma Pakowa Brązowa Akrylowa 48mm/45m Klejąca do Pakowania Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732780009"
+  },
+  {
+    "sku": "TP/0004",
+    "title": "Taśma Pakowa Transparentna Akrylowa 48mm/45m Klejąca Pakowanie Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732780118"
+  },
+  {
+    "sku": "TP/0005",
+    "title": "Taśma Pakowa Brązowa Akrylowa 48mm/54m Klejąca do Pakowania Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732780177"
+  },
+  {
+    "sku": "TP/0007",
+    "title": "Taśma Pakowa Brązowa Akrylowa Cicha 48mm/50m Klejąca do Kartonów Pakowanie",
+    "status": "CREATED",
+    "offer_id": "18732780220"
+  },
+  {
+    "sku": "TP/0008",
+    "title": "Taśma Pakowa Transparentna Akrylowa Cicha 48mm/50m Klejąca do Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732780312"
+  },
+  {
+    "sku": "TP/0010",
+    "title": "Taśma Pakowa Transparentna Hot-melt 48mm/45m Klejąca do Kartonów Pakowanie",
+    "status": "CREATED",
+    "offer_id": "18732780421"
+  },
+  {
+    "sku": "TP/0012",
+    "title": "Taśma Pakowa Brązowa Solvent Mocna 48mm/45m Klejąca do Kartonów Pakowanie",
+    "status": "CREATED",
+    "offer_id": "18732780524"
+  },
+  {
+    "sku": "TP/0013",
+    "title": "Taśma Pakowa Transparentna Solvent Mocna 48mm/45m Klejąca do Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732780636"
+  },
+  {
+    "sku": "TP/0014",
+    "title": "Taśma Pakowa Transparentna Solvent Mocna 48mm/60m Klejąca do Kartonów",
+    "status": "CREATED",
+    "offer_id": "18732780739"
+  },
+  {
+    "sku": "TP/0019",
+    "title": "Taśma z Nadrukiem Ostrożnie Szkło Hot-melt 48mm/45m Klejąca do Paczek",
+    "status": "CREATED",
+    "offer_id": "18732780879"
+  },
+  {
+    "sku": "TP/0024",
+    "title": "Taśma Pakowa Transparentna Hot-melt 48mm/60m Klejąca do Kartonów Pakowanie",
+    "status": "CREATED",
+    "offer_id": "18732781021"
+  }
+]

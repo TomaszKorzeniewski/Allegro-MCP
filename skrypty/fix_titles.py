@@ -3,7 +3,7 @@
 bez prefiksu 'Zestaw Nx', bez ucinania w połowie słowa, <=75 znaków.
 Nazwę bazową bierze z żywej oferty pojedynczej (wierne SEO)."""
 import sys, json, time
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -33,7 +33,7 @@ def clean_name(base, n):
 
 
 def main():
-    with open("/Users/tomasz/Desktop/allegro-buypack/create_zestawy_results.json", encoding="utf-8") as f:
+    with open(str(WYNIKI / "create_zestawy_results.json"), encoding="utf-8") as f:
         results = json.load(f)
     jobs = [(r["sku"], r["n"], r["offer_id"]) for r in results if r.get("offer_id")]
     # dołóż test 0009-12 (poza results); 0009-6 = wzorzec, zostawiamy
@@ -56,7 +56,7 @@ def main():
             print(f"  [ERR] {oid} {sku}-{n}: {str(e)[:200]}")
         time.sleep(1.0)
 
-    with open("/Users/tomasz/Desktop/allegro-buypack/fix_titles_results.json", "w", encoding="utf-8") as f:
+    with open(str(WYNIKI / "fix_titles_results.json"), "w", encoding="utf-8") as f:
         json.dump(changed, f, ensure_ascii=False, indent=2)
     print(f"\nGotowe: {len(changed)}/{len(jobs)} nazw poprawionych.")
 

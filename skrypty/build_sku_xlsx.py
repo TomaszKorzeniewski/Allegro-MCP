@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Excel: unikalne SKU (sygnatury) ofert POJEDYNCZYCH z konta Allegro + stan do weryfikacji."""
 import sys, re
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -91,7 +91,7 @@ for i, w in enumerate(widths, 1):
 ws.freeze_panes = "A2"
 ws.auto_filter.ref = f"A1:H{ws.max_row}"
 
-out = "/Users/tomasz/Desktop/allegro-buypack/SKU_pojedyncze_do_weryfikacji.xlsx"
+out = str(WYNIKI / "SKU_pojedyncze_do_weryfikacji.xlsx")
 wb.save(out)
 print(f"Zapisano: {out}")
 print(f"Unikalnych SKU pojedynczych: {lp}")

@@ -10,7 +10,7 @@ import sys
 import time
 import uuid
 
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 OFERTY = ["18791551973", "18791552054"]   # TP/0015 poj., TP/0017 - 12 szt.

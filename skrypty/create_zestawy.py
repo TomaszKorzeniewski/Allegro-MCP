@@ -10,7 +10,7 @@ Użycie:
   python create_zestawy.py all            # wszystkie 59 (pomija 0009-6, już istnieje)
 """
 import sys, json, time, re, copy
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -177,7 +177,7 @@ def main():
             results.append({"sku": sku, "n": n, "offer_id": None, "error": str(e)[:300]})
         time.sleep(1.3)
 
-    with open("/Users/tomasz/Desktop/allegro-buypack/create_zestawy_results.json", "w", encoding="utf-8") as f:
+    with open(str(WYNIKI / "create_zestawy_results.json"), "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     ok = sum(1 for r in results if r.get("offer_id"))
     print(f"\nGotowe: {ok}/{len(results)} OK. Zapisano create_zestawy_results.json")

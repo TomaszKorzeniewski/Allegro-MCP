@@ -5,7 +5,7 @@ Publish 7 remaining single-unit offers.
 - 422 EAN conflict → retry as INACTIVE
 """
 import sys, json, time, requests
-sys.path.insert(0, '/Users/tomasz/Desktop/allegro-buypack')
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -331,6 +331,6 @@ print("RESULTS:")
 for r in results:
     print(f"  {r['sku']} | {r['status']} | {r.get('offer_id','')} | {r.get('price','')} PLN")
 
-with open("/Users/tomasz/Desktop/allegro-buypack/publish_remaining_results.json","w",encoding="utf-8") as f:
+with open(str(WYNIKI / "publish_remaining_results.json"),"w",encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 print("Saved to publish_remaining_results.json")

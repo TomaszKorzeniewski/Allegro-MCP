@@ -1,106 +1,127 @@
 # allegro-buypack — serwer MCP dla Allegro REST API
 
 Serwer MCP (Python, `fastmcp`) dający Claude'owi dostęp do konta sprzedawcy
-Allegro: oferty, zamówienia, oceny, spory, finanse, przesyłki, reklamy
-i ustawienia sprzedaży.
+Allegro: oferty, zestawy, cenniki dostawy, zamówienia, oceny, spory, finanse,
+przesyłki i ustawienia sprzedaży.
 
-**Środowisko: PRODUKCJA** — `https://api.allegro.pl` i `https://allegro.pl/auth`.
+**Środowisko: PRODUKCJA**, `https://api.allegro.pl`. Narzędzia zapisujące
+działają na żywym koncie, dlatego operacje nieodwracalne i masowe wymagają
+jawnego potwierdzenia (patrz „Hamulce" niżej).
 
 ## Instalacja
 
-Wymagany Python 3.10+ (systemowy 3.9 jest za stary dla `fastmcp`).
-Projekt używa venv z Pythonem 3.12 (Homebrew):
+Wymagany Python 3.10 lub nowszy. Sprawdzone na 3.14 (Homebrew).
 
 ```bash
-cd ~/Desktop/allegro-buypack
-/usr/local/bin/python3.12 -m venv .venv
+python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
 ## Autoryzacja (OAuth 2.0 device flow)
 
 Wymaga `ALLEGRO_CLIENT_ID` i `ALLEGRO_CLIENT_SECRET` w `.env`
-(aplikacja typu "device" zarejestrowana na https://apps.developer.allegro.pl/).
+(aplikacja typu „device" zarejestrowana na https://apps.developer.allegro.pl/).
 
 ```bash
 .venv/bin/python auth.py
 ```
 
-Skrypt otworzy przeglądarkę z linkiem autoryzacyjnym i wyświetli kod.
-Po zatwierdzeniu na Allegro tokeny (`ALLEGRO_ACCESS_TOKEN`,
-`ALLEGRO_REFRESH_TOKEN`) zapisują się w `.env`. Access token jest ważny
-12 godzin — klient odświeża go automatycznie przy 401.
+Skrypt otworzy przeglądarkę i wyświetli kod. Po zatwierdzeniu tokeny zapisują
+się w `.env` wraz z momentem wygaśnięcia. Access token żyje 12 godzin
+i odświeża się sam, z pięciominutowym wyprzedzeniem.
 
-## Uruchomienie serwera MCP
+⚠️ **Refresh token Allegro jest jednorazowy.** Odświeżenie go z dwóch procesów
+naraz unieważnia autoryzację konta. Dlatego rotacja idzie pod blokadą pliku
+(`.env.lock`). Jeśli piszesz własny kod czytający `.env`, korzystaj z `auth.py`,
+zamiast wołać endpoint tokenów samodzielnie.
+
+## Uruchomienie
 
 ```bash
 .venv/bin/python server.py
 ```
 
-Konfiguracja w kliencie MCP (np. Claude Code / Claude Desktop):
-
-```json
-{
-  "mcpServers": {
-    "allegro": {
-      "command": "/Users/tomasz/Desktop/allegro-buypack/.venv/bin/python",
-      "args": ["/Users/tomasz/Desktop/allegro-buypack/server.py"]
-    }
-  }
-}
-```
-
-Lub w Claude Code:
+Rejestracja w Claude Code (podmień ścieżkę na swoją):
 
 ```bash
-claude mcp add allegro -- ~/Desktop/allegro-buypack/.venv/bin/python ~/Desktop/allegro-buypack/server.py
+claude mcp add allegro --scope user -- /ścieżka/do/.venv/bin/python /ścieżka/do/server.py
 ```
 
-## Dostępne narzędzia (tools)
+Bez CLI `claude` (na przykład w aplikacji desktopowej) wpis idzie do
+`~/.claude.json`, do klucza `mcpServers`. Zmiany widać po restarcie aplikacji.
 
-| Obszar | Tool | Endpoint |
-|---|---|---|
-| Oferty | `list_offers(status, limit, offset)` | GET /sale/offers |
-| | `get_offer(offer_id)` | GET /sale/product-offers/{id} |
-| | `create_offer(name, category_id, description, image_url, stock, price, status)` | POST /sale/product-offers |
-| | `update_offer(offer_id, fields_to_update)` | PATCH /sale/product-offers/{id} |
-| | `end_offer(offer_id)` | DELETE /sale/offers/{id} |
-| | `search_categories(phrase)` | GET /sale/categories |
-| Zamówienia | `list_orders(status, limit, offset)` | GET /order/checkout-forms |
-| | `get_order(order_id)` | GET /order/checkout-forms/{id} |
-| Oceny | `list_ratings(limit, offset)` | GET /sale/user-ratings |
-| Spory | `list_disputes(limit, offset, status)` | GET /sale/issues |
-| | `get_dispute(dispute_id)` | GET /sale/issues/{issueId} |
-| Finanse | `get_billing_balance()` | GET /billing/billing-entries |
-| | `list_payments(limit, offset)` | GET /payments/payment-operations |
-| Profil | `get_profile()` | GET /me |
-| Przesyłki | `get_shipment(shipment_id)` | GET /shipment-management/shipments/{id} |
-| | `get_shipment_label(shipment_id, page_size)` | POST /shipment-management/label |
-| Promocje | `list_promotions(promotion_type)` | GET /sale/loyalty/promotions |
-| Ustawienia | `get_sale_settings()` | GET /sale/delivery-settings + shipping-rates + return-policies + implied-warranties |
+## Narzędzia
 
-Uwagi względem pierwotnej specyfikacji (aktualne API Allegro):
+### Oferty
+| Narzędzie | Uwagi |
+|---|---|
+| `list_offers(status, limit, offset)` | Świeża oferta potrafi wisieć jako INACTIVE, licz oba statusy |
+| `get_offer(offer_id)` | |
+| `create_offer(name, sku, description_html, image_urls, price, stock, status)` | Domyślnie szkic z zerowym stanem |
+| `create_offer_set(offer_id_pojedynczej, sztuk, price, sku)` | Zestawy, kopiuje kartę produktu (inaczej 422) |
+| `recreate_detached_offer(offer_id_martwej, offer_id_siostry)` | Po PRODUCT_DETACHMENT |
+| `update_offer(offer_id, fields_to_update)` | PATCH fragmentem struktury |
+| `end_offer(offer_id, potwierdzam)` | **Nieodwracalne**, wymaga `potwierdzam=True` |
+| `activate_offer(offer_id)` | Dopycha publikację wiszącą w kolejce |
+| `search_categories(phrase)` | `/sale/matching-categories` |
 
-- Spory: `/sale/disputes` już nie istnieje — zastąpione przez `/sale/issues`
-  (Post Purchase Issues, nagłówek `Accept: application/vnd.allegro.beta.v1+json`).
-- Przesyłki: API nie ma endpointu listującego przesyłki — jest tylko pobranie
-  pojedynczej po ID (ID znajdziesz w zamówieniu). Etykiety pobiera się przez
-  `POST /shipment-management/label`.
-- Kampanie Allegro Ads nie są dostępne w publicznym REST API — zamiast tego
-  `list_promotions` zwraca promocje/rabaty konta (Multipack, rabaty od
-  wartości zamówienia, cenniki hurtowe).
-- `/sale/settings` nie istnieje — `get_sale_settings` agreguje cztery
-  faktyczne endpointy ustawień.
+### Cenniki dostawy
+| Narzędzie | Uwagi |
+|---|---|
+| `list_shipping_rates(nazwa_zawiera)` | |
+| `get_shipping_rate(shipping_rate_id)` | Dokłada **nazwy** metod, API zwraca same UUID-y |
+| `list_delivery_methods(nazwa_zawiera)` | Konto ma ich kilkaset |
+| `update_shipping_rate(..., zastosuj)` | PUT podmienia **całą** listę metod |
+| `create_shipping_rate(..., zastosuj)` | Wymaga `type` i `dispatchCountry` (API od 09.04.2026) |
 
-## Struktura projektu
+### Reszta
+`list_orders`, `get_order`, `list_ratings`, `list_disputes`, `get_dispute`,
+`get_billing_balance`, `list_payments`, `get_profile`, `get_shipment`,
+`get_shipment_label`, `list_promotions`, `get_sale_settings`.
+
+## Hamulce
+
+| Rodzaj operacji | Zachowanie |
+|---|---|
+| Nieodwracalna (`end_offer`) | Bez `potwierdzam=True` zwraca podgląd oferty, nic nie kończy |
+| Masowa (cenniki) | Bez `zastosuj=True` zwraca różnicę „usuwane / dodawane / pozostające" |
+| Odwracalna (cena, stan) | Wykonuje się od razu |
+
+## Ograniczenia API Allegro
+
+- `/sale/disputes` nie istnieje, zastąpione przez `/sale/issues`
+  (nagłówek `Accept: application/vnd.allegro.beta.v1+json`).
+- Nie ma endpointu listującego przesyłki, tylko pobranie pojedynczej po ID.
+- Kampanie Allegro Ads nie są dostępne w publicznym REST API.
+- `/sale/settings` nie istnieje, `get_sale_settings` agreguje cztery endpointy.
+- Pole „Marża netto" z Seller Center nie jest dostępne przez API.
+
+## Testy
+
+```bash
+.venv/bin/python -m pytest
+```
+
+Testy nie dotykają produkcji: cała warstwa HTTP jest podstawiana atrapą.
+Sprawdzają między innymi, że przy braku potwierdzenia nie idzie żadne
+zapytanie zapisujące, oraz że blokada tokenu faktycznie wyklucza drugi proces.
+
+## Struktura
 
 ```
 allegro-buypack/
-├── .env              # klucze aplikacji i tokeny (nie commituj!)
-├── .gitignore
-├── requirements.txt
-├── auth.py           # OAuth device flow + refresh tokenów
-├── allegro_client.py # klient HTTP (Bearer auth, retry przy 401)
-├── server.py         # serwer MCP z narzędziami
-└── README.md
+├── .env                # klucze i tokeny (w .gitignore)
+├── server.py           # narzędzia MCP
+├── allegro_client.py   # HTTP: ponawianie, paginacja, błędy
+├── auth.py             # OAuth device flow, rotacja pod blokadą
+├── config.py           # identyfikatory konta, GPSR, lokalizacja
+├── offers.py           # payload, zestawy, odtwarzanie odpiętych ofert
+├── descriptions.py     # generator opisu
+├── plugin/             # paczka dla Cowork
+├── skrypty/            # przebiegi jednorazowe (uwaga: działają przy imporcie)
+├── wyniki/             # wyniki przebiegów, ślad audytowy
+└── tests/
 ```
+
+⚠️ Skrypty w `skrypty/` wykonują operacje na produkcji już przy imporcie.
+Nie uruchamiaj ich, żeby sprawdzić, czy działają. Od tego jest `pytest`.

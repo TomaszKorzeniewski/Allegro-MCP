@@ -2,11 +2,11 @@
 """
 Batch creation of 13 single-unit (wariant 1) tape offers on Allegro.
 All created as INACTIVE drafts. Prices filled by Tomasz manually before publishing.
-Run: /Users/tomasz/Desktop/allegro-buypack/.venv/bin/python3 create_single_offers.py
+Run: .venv/bin/python3 create_single_offers.py
 """
 
 import json, sys, time, requests
-sys.path.insert(0, '/Users/tomasz/Desktop/allegro-buypack')
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -243,6 +243,6 @@ for r in results:
     print(f"  {r['sku']} | {r['status']} | {r.get('offer_id','')}")
 
 # Save results
-with open("/Users/tomasz/Desktop/allegro-buypack/create_single_results.json", "w", encoding="utf-8") as f:
+with open(str(WYNIKI / "create_single_results.json"), "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 print("\nSaved to create_single_results.json")

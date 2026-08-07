@@ -17,7 +17,7 @@ import json
 import sys
 import time
 
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -154,7 +154,7 @@ def main():
         print("\nDRY-RUN — nic nie wystawiono. Uruchom z --apply.")
         return
 
-    with open("/Users/tomasz/Desktop/allegro-buypack/recreate_detached_results.json",
+    with open(str(WYNIKI / "recreate_detached_results.json"),
               "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"\nGotowe: {sum(1 for r in results if r.get('nowa'))}/{len(results)} OK")

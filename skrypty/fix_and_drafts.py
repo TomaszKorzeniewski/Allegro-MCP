@@ -5,7 +5,7 @@ Dwie operacje:
 2. Tworzenie 6 szkiców INACTIVE bez EAN (TP/0006, 0015–0018, 0030)
 """
 import sys, json, time, requests
-sys.path.insert(0, '/Users/tomasz/Desktop/allegro-buypack')
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -264,6 +264,6 @@ for r in draft_results:
     print(f"  {r['sku']} | {r['status']} | {r.get('offer_id','—')} | {r.get('price','')} PLN")
 
 all_results = {"fix": fix_results, "drafts": draft_results}
-with open("/Users/tomasz/Desktop/allegro-buypack/fix_and_drafts_results.json","w",encoding="utf-8") as f:
+with open(str(WYNIKI / "fix_and_drafts_results.json"),"w",encoding="utf-8") as f:
     json.dump(all_results, f, ensure_ascii=False, indent=2)
 print("\nZapisano do fix_and_drafts_results.json")

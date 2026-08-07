@@ -1,0 +1,6 @@
+{
+  "name": "allegro-buypack",
+  "version": "0.2.0",
+  "description": "Konto Allegro buy-pack przez REST API: oferty, zestawy, cenniki dostawy, zamówienia, rozliczenia. Operacje nieodwracalne i masowe wymagają jawnego potwierdzenia.",
+  "author": { "name": "Tomasz Korzeniewski" }
+}

@@ -2,7 +2,7 @@
 """Sumuje sprzedaż konta: paginuje zamówienia (checkout-forms), grupuje po miesiącu."""
 import sys, json
 from collections import defaultdict
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient
 
 client = AllegroClient()
@@ -47,5 +47,5 @@ for ym in sorted(by_month):
 
 json.dump({"total_orders": gcount, "gmv": round(grand, 2),
            "by_month": {k: {"count": v["count"], "sum": round(v["sum"], 2)} for k, v in by_month.items()}},
-          open("/Users/tomasz/Desktop/allegro-buypack/sales_summary.json", "w", encoding="utf-8"),
+          open(str(WYNIKI / "sales_summary.json"), "w", encoding="utf-8"),
           ensure_ascii=False, indent=2)

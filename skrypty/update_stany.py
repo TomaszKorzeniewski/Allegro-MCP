@@ -10,12 +10,12 @@ import math
 import sys
 import time
 
-sys.path.insert(0, "/Users/tomasz/Desktop/allegro-buypack")
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 BUFOR = 0.85
 DRY_RUN = "--apply" not in sys.argv
-OUT = "/Users/tomasz/Desktop/allegro-buypack/update_stany_results.json"
+OUT = str(WYNIKI / "update_stany_results.json")
 
 # SKU -> ilość zweryfikowana (kolumna G arkusza)
 CONF = {

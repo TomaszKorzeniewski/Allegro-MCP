@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "allegro": {
+      "type": "stdio",
+      "command": "/Users/tomaszkorzeniewski/Desktop/Claude/projekty/allegro-buypack/.venv/bin/python",
+      "args": [
+        "/Users/tomaszkorzeniewski/Desktop/Claude/projekty/allegro-buypack/server.py"
+      ],
+      "env": {}
+    }
+  }
+}

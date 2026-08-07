@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
-Delete 13 old INACTIVE offers (no product link) and recreate properly:
-- Full productSet with inline product (images, params, safety, responsibleProducer)
-- Correct description sections (5-section image+text layout)
-- Price at 50% margin + 2 PLN (brutto)
-- Status ACTIVE — published immediately
+Opcja A — 7 zablokowanych SKU (catalog-mismatch)
+Linkuje do istniejącego catalog product ID zamiast tworzyć nowy produkt inline.
+Próbuje ACTIVE; jeśli błąd → INACTIVE (szkic do ręcznego opublikowania przez Tomasza).
 """
 import sys, json, time, requests
-sys.path.insert(0, '/Users/tomasz/Desktop/allegro-buypack')
+from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
 
 client = AllegroClient()
@@ -32,65 +30,43 @@ SAFETY_TEXT = (
     "* Recycling: After use, dispose of it in a suitable waste container."
 )
 
-# ─── SKU data ─────────────────────────────────────────────────────────────────
-# (sku, old_offer_id, title, kolor_id, klej_id, sz, dl, EAN, dalpo_slug, price_brutto, nadruk_id)
-BOPP="236026_1647664"; BRAZ="10906_2"; BEZB="10906_1"; BIALY="10906_1121139"
-AKR="10905_1"; HM="10905_1648206"; SOL="10905_1648207"
-BRAK="249936_1784793"; OSTRZEG="249936_1784794"
-
+# (sku, catalog_product_id, title, dalpo_slug, price_brutto, stock, typ_opisu)
 SKUS = [
-  ("TP/0001","18732779802",
+  ("TP/0001",
+   "36f6d01b-65a7-4445-abac-1b2eb50ea4da",
    "Taśma Pakowa Brązowa Akrylowa 48mm/30m Klejąca do Pakowania Kartonów",
-   BRAZ, AKR, 48, 30, "5905833094019",
-   "brazowa-tasma-pakowa-akryl-basic-rozne-rozmiary", "4.92", BRAK, "akryl"),
-  ("TP/0002","18732779959",
+   "brazowa-tasma-pakowa-akryl-basic-rozne-rozmiary",
+   "4.92", 1806, "akryl"),
+  ("TP/0002",
+   "d17b5157-7c40-4028-ad80-846148d7a67e",
    "Taśma Pakowa Transparentna Akrylowa 48mm/30m Klejąca Pakowanie Kartonów",
-   BEZB, AKR, 48, 30, "5905833093982",
-   "transparentna-tasma-pakowa-akryl-basic-rozne-rozmiary", "5.09", BRAK, "akryl"),
-  ("TP/0003","18732780009",
-   "Taśma Pakowa Brązowa Akrylowa 48mm/45m Klejąca do Pakowania Kartonów",
-   BRAZ, AKR, 48, 45, "5905833094026",
-   "brazowa-tasma-pakowa-akryl-basic-rozne-rozmiary", "5.90", BRAK, "akryl"),
-  ("TP/0004","18732780118",
+   "transparentna-tasma-pakowa-akryl-basic-rozne-rozmiary",
+   "5.09", 1332, "akryl"),
+  ("TP/0004",
+   "997e7e84-6ed6-4b9a-bb8c-08f13405f13b",
    "Taśma Pakowa Transparentna Akrylowa 48mm/45m Klejąca Pakowanie Kartonów",
-   BEZB, AKR, 48, 45, "5905833094040",
-   "transparentna-tasma-pakowa-akryl-basic-rozne-rozmiary", "5.90", BRAK, "akryl"),
-  ("TP/0005","18732780177",
-   "Taśma Pakowa Brązowa Akrylowa 48mm/54m Klejąca do Pakowania Kartonów",
-   BRAZ, AKR, 48, 54, "5905833094088",
-   "brazowa-tasma-pakowa-akryl-basic-rozne-rozmiary", "5.04", BRAK, "akryl"),
-  ("TP/0007","18732780220",
+   "transparentna-tasma-pakowa-akryl-basic-rozne-rozmiary",
+   "5.90", 1392, "akryl"),
+  ("TP/0007",
+   "2eade502-ffee-4947-866e-e38eefc8ac03",
    "Taśma Pakowa Brązowa Akrylowa Cicha 48mm/50m Klejąca do Kartonów Pakowanie",
-   BRAZ, AKR, 48, 50, "5905833094125",
-   "brazowa-tasma-pakowa-akryl-cicha-48mm-54m", "8.63", BRAK, "akryl_cichy"),
-  ("TP/0008","18732780312",
-   "Taśma Pakowa Transparentna Akrylowa Cicha 48mm/50m Klejąca do Kartonów",
-   BEZB, AKR, 48, 50, "5905833094149",
-   "transparentna-tasma-pakowa-akryl-cicha-48-54m", "8.63", BRAK, "akryl_cichy"),
-  ("TP/0010","18732780421",
+   "brazowa-tasma-pakowa-akryl-cicha-48mm-54m",
+   "8.63", 1084, "akryl_cichy"),
+  ("TP/0010",
+   "c757c364-f78e-4c33-9f1b-ae1fa115a542",
    "Taśma Pakowa Transparentna Hot-melt 48mm/45m Klejąca do Kartonów Pakowanie",
-   BEZB, HM, 48, 45, "5905833092633",
-   "transparentna-tasma-pakowa-hot-melt-rozne-rozmiary", "6.59", BRAK, "hot_melt"),
-  ("TP/0012","18732780524",
-   "Taśma Pakowa Brązowa Solvent Mocna 48mm/45m Klejąca do Kartonów Pakowanie",
-   BRAZ, SOL, 48, 45, "5905833093852",
-   "brazowa-tasma-pakowa-mocna-solvent-rozne-rozmiary", "7.06", BRAK, "solvent"),
-  ("TP/0013","18732780636",
+   "transparentna-tasma-pakowa-hot-melt-rozne-rozmiary",
+   "6.59", 1436, "hot_melt"),
+  ("TP/0013",
+   "e2b0a9ea-1af2-401c-b410-07825734412d",
    "Taśma Pakowa Transparentna Solvent Mocna 48mm/45m Klejąca do Kartonów",
-   BEZB, SOL, 48, 45, "5905833093876",
-   "transparentna-tasma-pakowa-mocna-solvent-rozne-rozmiary", "5.93", BRAK, "solvent"),
-  ("TP/0014","18732780739",
-   "Taśma Pakowa Transparentna Solvent Mocna 48mm/60m Klejąca do Kartonów",
-   BEZB, SOL, 48, 60, "5905833093920",
-   "transparentna-tasma-pakowa-mocna-solvent-rozne-rozmiary", "10.38", BRAK, "solvent"),
-  ("TP/0019","18732780879",
+   "transparentna-tasma-pakowa-mocna-solvent-rozne-rozmiary",
+   "5.93", 1852, "solvent"),
+  ("TP/0019",
+   "a166de1b-15a1-4e86-95c7-8ca4b485695f",
    "Taśma z Nadrukiem Ostrożnie Szkło Hot-melt 48mm/45m Klejąca do Paczek",
-   BIALY, HM, 48, 45, "5905833093227",
-   "tasma-z-nadrukiem-ostroznie-szklo-48mm-x-45-m", "7.77", OSTRZEG, "nadruk"),
-  ("TP/0024","18732781021",
-   "Taśma Pakowa Transparentna Hot-melt 48mm/60m Klejąca do Kartonów Pakowanie",
-   BEZB, HM, 48, 60, "5905833092633",
-   "transparentna-tasma-pakowa-hot-melt-rozne-rozmiary", "6.32", BRAK, "hot_melt"),
+   "tasma-z-nadrukiem-ostroznie-szklo-48mm-x-45-m",
+   "7.77", 3760, "nadruk"),
 ]
 
 def get_dalpo_images(slug):
@@ -102,9 +78,16 @@ def get_dalpo_images(slug):
         print(f"  [WARN] images fetch failed: {e}")
         return []
 
-def build_description(title, dl, t, imgs):
+def build_description(title, t, imgs):
     n = len(imgs)
     i1 = imgs[0]; i2 = imgs[min(1,n-1)]; i3 = imgs[min(2,n-1)]; i4 = imgs[min(3,n-1)]
+
+    # Extract length from title for display
+    dl_str = ""
+    for part in title.split("/"):
+        if part.endswith("m"):
+            dl_str = part.replace("m","") + "m"
+            break
 
     if t == "akryl_cichy":
         h1s = "✳️ Cicha taśma akrylowa – mocne sklejenie bez hałasu dyspensera"
@@ -112,8 +95,8 @@ def build_description(title, dl, t, imgs):
         zalety = (
             "<p><b>✅ Cicha praca</b> – odwija się bez zgrzytania – pracownicy mogą skupić się na pracy.</p>"
             "<p><b>✳️ Wytrzymałość akrylu</b> – mocne i trwałe sklejenie kartonów.</p>"
-            f"<p><b>⭐ Odporność na UV i temperaturę</b> – nie żółknie, trzyma latem jak zimą.</p>"
-            f"<p><b>🛡️ Długość {dl}m na rolce</b> – rzadziej wymieniasz rolkę, mniej przestojów.</p>")
+            "<p><b>⭐ Odporność na UV i temperaturę</b> – nie żółknie, trzyma latem jak zimą.</p>"
+            "<p><b>🛡️ Rolka gotowa do pracy</b> – komfort codziennego użytku.</p>")
         li_extra = "<li>wszędzie tam, gdzie hałas dyspensera taśmy jest uciążliwy.</li>"
     elif t == "hot_melt":
         h1s = "✳️ Taśma hot-melt – błyskawiczne klejenie kauczukiem, wysoka przyczepność"
@@ -122,7 +105,7 @@ def build_description(title, dl, t, imgs):
             "<p><b>✅ Błyskawiczne klejenie</b> – klej kauczukowy wiąże natychmiast po przyłożeniu.</p>"
             "<p><b>✳️ Mocna przyczepność</b> – utrzymuje szczelność nawet przy cięższych paczkach.</p>"
             "<p><b>⭐ Odporność na wilgoć i mróz</b> – nie traci właściwości w niskich temperaturach.</p>"
-            f"<p><b>🛡️ Długość {dl}m na rolce</b> – rzadziej wymieniasz rolkę, mniej przestojów.</p>")
+            "<p><b>🛡️ Rolka gotowa do pracy</b> – wysoka wydajność na dyspensera.</p>")
         li_extra = "<li>środowiskach z niższą temperaturą – magazyn chłodniczy, transport zimowy.</li>"
     elif t == "solvent":
         h1s = "✳️ Taśma solvent – najsilniejsze klejenie do wymagających warunków"
@@ -131,7 +114,7 @@ def build_description(title, dl, t, imgs):
             "<p><b>✅ Ekstremalnie mocna przyczepność</b> – najsilniejszy klej w klasie taśm pakowych.</p>"
             "<p><b>✳️ Odporność na trudne warunki</b> – trzyma na chropowatych i trudnych powierzchniach.</p>"
             "<p><b>⭐ Trwałość klejenia</b> – nie odkleją się nawet po dłuższym przechowywaniu.</p>"
-            f"<p><b>🛡️ Długość {dl}m na rolce</b> – rzadziej wymieniasz rolkę, mniej przestojów.</p>")
+            "<p><b>🛡️ Rolka gotowa do pracy</b> – wysoka wydajność na dyspensera.</p>")
         li_extra = "<li>aplikacjach wymagających najwyższej siły klejenia – ciężkie kartony, trudne powierzchnie.</li>"
     elif t == "nadruk":
         h1s = "✳️ Taśma z nadrukiem Ostrożnie Szkło – hot-melt, natychmiastowe klejenie"
@@ -140,7 +123,7 @@ def build_description(title, dl, t, imgs):
             "<p><b>✅ Czytelny nadruk ostrzegawczy</b> – kurier i magazynier widzą, że paczka wymaga ostrożności.</p>"
             "<p><b>✳️ Klej hot-melt (kauczuk)</b> – natychmiastowe i mocne klejenie.</p>"
             "<p><b>⭐ Biała taśma z czerwonym nadrukiem</b> – wyraźnie widoczna na tle kartonu.</p>"
-            f"<p><b>🛡️ Długość {dl}m na rolce</b> – rzadziej wymieniasz rolkę.</p>")
+            "<p><b>🛡️ Rolka gotowa do pracy</b> – rzadziej wymieniasz rolkę.</p>")
         li_extra = "<li>wysyłkach zawierających szkło, ceramikę, elektronikę i inne kruche przedmioty.</li>"
     else:  # akryl
         h1s = "✳️ Taśma akrylowa – mocne klejenie, odporność na UV i temperaturę"
@@ -149,7 +132,7 @@ def build_description(title, dl, t, imgs):
             "<p><b>✅ Mocne i stabilne klejenie</b> – paczka dotrze do klienta szczelna, bez ryzyka otwarcia.</p>"
             "<p><b>✳️ Odporność na UV i temperaturę</b> – nie żółknie, trzyma latem i zimą.</p>"
             "<p><b>⭐ Ekonomiczna cena</b> – dobry stosunek jakości do kosztów codziennego pakowania.</p>"
-            f"<p><b>🛡️ Długość {dl}m na rolce</b> – rzadziej wymieniasz rolkę, mniej przestojów.</p>")
+            "<p><b>🛡️ Rolka gotowa do pracy</b> – wygodna i wydajna.</p>")
         li_extra = ""
 
     return {"sections": [
@@ -179,54 +162,26 @@ def build_description(title, dl, t, imgs):
 
 results = []
 
-for sku, old_id, title, kolor_id, klej_id, sz, dl, ean, dalpo_slug, price, nadruk_id, t in SKUS:
+for sku, catalog_id, title, dalpo_slug, price, stock, t in SKUS:
     print(f"\n{'='*55}")
     print(f"{sku} — {title[:50]}...")
 
-    # 1) Delete old offer
-    try:
-        client.delete(f"/sale/offers/{old_id}")
-        print(f"  Deleted old offer {old_id}")
-    except AllegroAPIError as e:
-        print(f"  [WARN] delete: {e}")
-
-    time.sleep(0.5)
-
-    # 2) Get images from Dalpo
     imgs = get_dalpo_images(dalpo_slug)
     if not imgs:
-        print(f"  [SKIP] No images")
+        print(f"  [SKIP] No images from Dalpo")
         results.append({"sku":sku,"status":"SKIP_NO_IMAGES","offer_id":None})
         continue
     print(f"  Images: {len(imgs)}")
 
-    # 3) Build description
-    desc = build_description(title, dl, t, imgs)
+    desc = build_description(title, t, imgs)
 
-    # 4) Create offer with full productSet + ACTIVE
+    # Opcja A: link do istniejącego produktu katalogowego przez ID
     payload = {
         "name": title,
         "category": {"id": CATEGORY_ID},
         "external": {"id": f"{sku}-1"},
         "productSet": [{
-            "product": {
-                "name": title,
-                "category": {"id": CATEGORY_ID},
-                "images": imgs[:4],   # plain strings!
-                "parameters": [
-                    {"id":"248811","valuesIds":["248811_1131943"]},  # Marka: Dalpo
-                    {"id":"236026","valuesIds":[BOPP]},              # Materiał: BOPP
-                    {"id":"10906", "valuesIds":[kolor_id]},          # Kolor
-                    {"id":"10905", "valuesIds":[klej_id]},           # Rodzaj kleju
-                    {"id":"227381","values":[str(sz)]},              # Szerokość
-                    {"id":"203949","values":[str(dl)]},              # Długość
-                    {"id":"233101","values":["1"]},                  # Liczba sztuk
-                    {"id":"225693","values":[ean]},                  # EAN
-                    {"id":"249936","valuesIds":[nadruk_id]},         # Nadruk
-                    {"id":"17448", "values":["0.1"]},                # Waga
-                    {"id":"250792","values":["39211900"]},           # Kod taryfy
-                ],
-            },
+            "product": {"id": catalog_id},
             "quantity": {"value": 1},
             "responsibleProducer": {"id": RESPONSIBLE_PRODUCER_ID},
             "safetyInformation": {"description": SAFETY_TEXT, "type": "TEXT"},
@@ -236,7 +191,7 @@ for sku, old_id, title, kolor_id, klej_id, sz, dl, ean, dalpo_slug, price, nadru
         "description": desc,
         "parameters": [{"id":"11323","values":["Nowy"],"valuesIds":["11323_1"]}],
         "sellingMode": {"format":"BUY_NOW","price":{"amount":price,"currency":"PLN"}},
-        "stock": {"available":0,"unit":"UNIT"},  # will set stock after; 0 avoids instant sale
+        "stock": {"available": 0, "unit": "UNIT"},
         "publication": {"status": "ACTIVE"},
         "afterSalesServices": {
             "impliedWarranty": {"id": WARRANTY_ID},
@@ -250,26 +205,61 @@ for sku, old_id, title, kolor_id, klej_id, sz, dl, ean, dalpo_slug, price, nadru
     try:
         resp = client.post("/sale/product-offers", json=payload)
         new_id = resp.get("id","?")
-        prod_id = None
-        for ps in resp.get("productSet",[]):
-            prod_id = (ps.get("product") or {}).get("id")
-        print(f"  [OK] New offer: {new_id} | product: {prod_id} | {price} PLN | ACTIVE")
-
-        # 5) Set correct stock
-        client.patch(f"/sale/product-offers/{new_id}", json={"stock":{"available": 9999}})
-
-        results.append({"sku":sku,"status":"ACTIVE","offer_id":new_id,"price":price})
+        print(f"  [OK ACTIVE] offer_id={new_id} | {price} PLN")
+        client.patch(f"/sale/product-offers/{new_id}", json={"stock":{"available": stock}})
+        print(f"  [OK] stock set to {stock}")
+        results.append({"sku":sku,"status":"ACTIVE","offer_id":new_id,"price":price,"stock":stock})
     except AllegroAPIError as e:
-        print(f"  [ERR] {str(e)[:150]}")
-        results.append({"sku":sku,"status":f"ERROR","offer_id":None})
+        err_msg = str(e)
+        print(f"  [ERR ACTIVE] {err_msg[:200]}")
+        print(f"  Próbuję INACTIVE (szkic)...")
 
-    time.sleep(1)
+        payload["publication"] = {"status": "INACTIVE"}
+        try:
+            resp2 = client.post("/sale/product-offers", json=payload)
+            new_id2 = resp2.get("id","?")
+            print(f"  [OK INACTIVE/SZKIC] offer_id={new_id2} | {price} PLN")
+            results.append({"sku":sku,"status":"INACTIVE","offer_id":new_id2,"price":price,"stock":stock,"active_error":err_msg[:200]})
+        except AllegroAPIError as e2:
+            err2 = str(e2)
+            print(f"  [ERR INACTIVE] {err2[:200]}")
+            print(f"  Próbuję bez productSet (sama oferta)...")
+
+            # Ostatnia próba: oferta bez powiązania z produktem
+            payload_no_product = {
+                "name": title,
+                "category": {"id": CATEGORY_ID},
+                "external": {"id": f"{sku}-1"},
+                "images": imgs[:8],
+                "description": desc,
+                "parameters": [{"id":"11323","values":["Nowy"],"valuesIds":["11323_1"]}],
+                "sellingMode": {"format":"BUY_NOW","price":{"amount":price,"currency":"PLN"}},
+                "stock": {"available": stock, "unit": "UNIT"},
+                "publication": {"status": "INACTIVE"},
+                "afterSalesServices": {
+                    "impliedWarranty": {"id": WARRANTY_ID},
+                    "returnPolicy": {"id": RETURN_POLICY_ID},
+                },
+                "delivery": {"shippingRates":{"id":SHIPPING_RATES_ID},"handlingTime":"PT24H"},
+                "location": LOCATION,
+                "payments": {"invoice": "VAT"},
+            }
+            try:
+                resp3 = client.post("/sale/product-offers", json=payload_no_product)
+                new_id3 = resp3.get("id","?")
+                print(f"  [OK SZKIC BEZ PRODUKTU] offer_id={new_id3}")
+                results.append({"sku":sku,"status":"INACTIVE_NO_PRODUCT","offer_id":new_id3,"price":price,"stock":stock})
+            except AllegroAPIError as e3:
+                print(f"  [FAIL] {str(e3)[:200]}")
+                results.append({"sku":sku,"status":"FAIL","offer_id":None,"error":str(e3)[:300]})
+
+    time.sleep(1.2)
 
 print(f"\n{'='*55}")
-print("RESULTS:")
+print("WYNIKI:")
 for r in results:
-    print(f"  {r['sku']} | {r['status']} | {r.get('offer_id','')} | {r.get('price','')} PLN")
+    print(f"  {r['sku']} | {r['status']} | {r.get('offer_id','—')} | {r.get('price','')} PLN")
 
-with open("/Users/tomasz/Desktop/allegro-buypack/publish_results.json","w",encoding="utf-8") as f:
+with open(str(WYNIKI / "publish_blocked_a_results.json"),"w",encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
-print("Saved to publish_results.json")
+print("\nZapisano do publish_blocked_a_results.json")

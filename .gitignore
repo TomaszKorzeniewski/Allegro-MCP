@@ -1,7 +1,11 @@
 .env
+.env.backup-*
+.env.lock
 __pycache__/
 *.pyc
 .venv/
 venv/
 *.pdf
 graphify-out/
+etykiety/
+.pytest_cache/

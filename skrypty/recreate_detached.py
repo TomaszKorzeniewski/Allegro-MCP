@@ -19,16 +19,13 @@ import time
 
 from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
+from config import LOCATION, RETURN_POLICY_ID, WARRANTY_ID
 
 client = AllegroClient()
 DRY_RUN = "--apply" not in sys.argv
 
-WARRANTY_ID = "c6bd41ce-bc1c-41a6-be3c-651dd035dc43"
-RETURN_POLICY_ID = "3af930f6-631c-420f-ab59-23582f9288ff"
 SINGLE_SHIPPING_ID = "fcf29f15-4038-4046-be17-f047d8f56f89"
 ZESTAW_SHIPPING_ID = "98c51ddb-13d6-419f-94cb-57c68bd8f8b7"
-LOCATION = {"countryCode": "PL", "province": "SLASKIE", "city": "Cieszyn",
-            "postCode": "43-400"}
 
 JOBS = [
     {

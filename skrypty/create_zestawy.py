@@ -12,14 +12,11 @@ Użycie:
 import sys, json, time, re, copy
 from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
+from config import CATEGORY_ID, LOCATION, RETURN_POLICY_ID, WARRANTY_ID
 
 client = AllegroClient()
 
-WARRANTY_ID = "c6bd41ce-bc1c-41a6-be3c-651dd035dc43"
-RETURN_POLICY_ID = "3af930f6-631c-420f-ab59-23582f9288ff"
 ZESTAW_SHIPPING_ID = "98c51ddb-13d6-419f-94cb-57c68bd8f8b7"  # cennik dostawy zestawów (z wzorca 0009-6szt)
-LOCATION = {"countryCode": "PL", "province": "SLASKIE", "city": "Cieszyn", "postCode": "43-400"}
-CATEGORY_ID = "64541"
 
 # sku -> live single offer_id
 SINGLE = {

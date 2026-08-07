@@ -7,28 +7,11 @@ Publish 7 remaining single-unit offers.
 import sys, json, time, requests
 from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
+from config import CATEGORY_ID, LOCATION, RESPONSIBLE_PRODUCER_ID, RETURN_POLICY_ID, SAFETY_TEXT, SHIPPING_RATES_ID, WARRANTY_ID
 
 client = AllegroClient()
 
-RESPONSIBLE_PRODUCER_ID = "a0e7065b-d173-4b9c-8de6-37dd0535899b"
-WARRANTY_ID       = "c6bd41ce-bc1c-41a6-be3c-651dd035dc43"
-RETURN_POLICY_ID  = "3af930f6-631c-420f-ab59-23582f9288ff"
-SHIPPING_RATES_ID = "fcf29f15-4038-4046-be17-f047d8f56f89"
-LOCATION = {"countryCode":"PL","province":"SLASKIE","city":"Cieszyn","postCode":"43-400"}
-CATEGORY_ID = "64541"
 
-SAFETY_TEXT = (
-    "List of packing belt safety warnings based on the requirements of General Product Safety "
-    "Regulation (EU) 2023/988 (GPSR):\n"
-    "* Risk of intersection: Watch out for the sharp edges of the belt dispenser or the tape itself. "
-    "You can cut yourself while cutting off.\n"
-    "* Suffocation Hazard: Do not allow children to play with packing tape. "
-    "There is a risk of wrapping around the neck and suffocation.\n"
-    "* Skin allergies: If you experience an allergic reaction on your skin after contact with the "
-    "adhesive, stop using the tape.\n"
-    "* Storage: Store the tape in a dry and cool place, away from direct sunlight and heat sources.\n"
-    "* Recycling: After use, dispose of it in a suitable waste container."
-)
 
 BOPP="236026_1647664"; BRAZ="10906_2"; BEZB="10906_1"; BIALY="10906_1121139"
 AKR="10905_1"; HM="10905_1648206"; SOL="10905_1648207"

@@ -8,16 +8,12 @@ Run: .venv/bin/python3 create_single_offers.py
 import json, sys, time, requests
 from _sciezki import KORZEN, WYNIKI  # ustawia sys.path na korzeń projektu
 from allegro_client import AllegroClient, AllegroAPIError
+from config import CATEGORY_ID, LOCATION, RETURN_POLICY_ID, SHIPPING_RATES_ID, WARRANTY_ID
 
 client = AllegroClient()
 
 # ─── Template settings from TP/0009-1 ────────────────────────────────────────
-CATEGORY_ID        = "64541"
-WARRANTY_ID        = "c6bd41ce-bc1c-41a6-be3c-651dd035dc43"
-RETURN_POLICY_ID   = "3af930f6-631c-420f-ab59-23582f9288ff"
-SHIPPING_RATES_ID  = "fcf29f15-4038-4046-be17-f047d8f56f89"
 
-LOCATION = {"countryCode": "PL", "province": "SLASKIE", "city": "Cieszyn", "postCode": "43-400"}
 
 # ─── 13 clean single-unit SKUs ───────────────────────────────────────────────
 SKUS = [

@@ -9,3 +9,5 @@ venv/
 graphify-out/
 etykiety/
 .pytest_cache/
+wyniki/
+*.xlsx

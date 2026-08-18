@@ -73,3 +73,20 @@ usunęłoby 32 z 33 metod dostawy w cenniku.
 ## Nie scrapuj Allegro
 
 Danych ofert nie pobieramy przeglądarką ani `web_fetch`. Od tego jest ten serwer.
+
+## Świeżość danych: `wyniki/latest.json` zamiast odpytywania od nowa
+
+Zanim wołasz `list_offers`/`list_orders`/`get_billing_balance` na żywo dla raportu,
+sprawdź `wyniki/latest.json` (generowany przez `skrypty/snapshot_report.py`, jedyny
+skrypt w `skrypty/` bezpieczny do wielokrotnego odpalania, bo jest czysto odczytowy).
+
+- **Domyślnie traktuj dane z `latest.json` jako aktualne.** Nie ma sztywnego TTL:
+  nie odpytuj API ponownie, dopóki Tomek nie zasygnalizuje, że dane są nieświeże.
+- **Zawsze podawaj wiek danych** przy prezentacji raportu (`fetched_at` z pliku,
+  np. "dane sprzed 3 dni").
+- **Po każdym zapisie przez narzędzie MCP** (`update_offer`, `update_shipping_rate`,
+  `activate_offer`, `end_offer`, itd.) zaktualizuj odpowiadający fragment
+  `latest.json` ręcznie, zamiast pobierać cały snapshot od nowa: już znasz nowy
+  stan, bo to Ty go ustawiłeś.
+- Żeby wymusić świeży snapshot: `python skrypty/snapshot_report.py` (z korzenia
+  projektu, w wirtualnym środowisku z zainstalowanym `requests`).

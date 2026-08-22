@@ -8,6 +8,9 @@ przesyłki i ustawienia sprzedaży.
 działają na żywym koncie, dlatego operacje nieodwracalne i masowe wymagają
 jawnego potwierdzenia (patrz „Hamulce" niżej).
 
+W codziennym użyciu na koncie sprzedawcy Allegro **buy-pack**: ponad 100
+aktywnych ofert, zarządzanych przez ten serwer zamiast ręcznie przez panel.
+
 ## Instalacja
 
 Wymagany Python 3.10 lub nowszy. Sprawdzone na 3.14 (Homebrew).
@@ -125,3 +128,7 @@ allegro-buypack/
 
 ⚠️ Skrypty w `skrypty/` wykonują operacje na produkcji już przy imporcie.
 Nie uruchamiaj ich, żeby sprawdzić, czy działają. Od tego jest `pytest`.
+
+## Licencja
+
+MIT, patrz [LICENSE](LICENSE).
